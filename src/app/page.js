@@ -1,131 +1,112 @@
-import styles from "./page.module.css";
 import Link from "next/link";
+import {
+  Link as LinkIcon,
+  QrCode,
+  FileText,
+  Image as ImageIcon,
+  FileCode2,
+  Code2,
+} from "lucide-react";
+import styles from "./page.module.css";
 
 export default function Home() {
   return (
-    <main className={styles.container}>
+    <main className={styles.main}>
       <header className={styles.header}>
-        <h1 className={styles.title}>
-          Aegis<span className={styles.accent}>Kit</span>
-        </h1>
-        <p className={styles.subtitle}>Secure // Local // Modular</p>
+        <div>
+          <h1 className={styles.title}>AegisKit</h1>
+          <p className={styles.subtitle}>
+            Secure. Local. Modular. A privacy-first web toolkit.
+          </p>
+        </div>
       </header>
-      {/* include tools */}
+
       <div className={styles.grid}>
-        <Link href="/qr" style={{ textDecoration: "none", color: "inherit" }}>
-          <div
-            style={{
-              padding: "2rem",
-              border: "1px solid var(--border-color)",
-              borderRadius: "8px",
-              backgroundColor: "var(--bg-surface)",
-              cursor: "pointer",
-              transition: "border-color 0.2s ease",
-            }}
-          >
-            <h3>QR Generator</h3>
-            <p style={{ color: "var(--text-muted)", marginTop: "0.5rem" }}>
-              Offline matrix generation with custom styling.
-            </p>
+        <Link href="/shortener" style={{ textDecoration: "none" }}>
+          <div className={styles.card}>
+            <div className={styles.iconWrapper}>
+              <LinkIcon size={32} strokeWidth={1.5} />
+            </div>
+            <div>
+              <h3 className={styles.cardTitle}>URL Routing Engine</h3>
+              <p className={styles.cardDesc}>
+                Local-first, privacy-respecting link redirection and management.
+              </p>
+            </div>
           </div>
         </Link>
 
-        <Link
-          href="/shortener"
-          style={{ textDecoration: "none", color: "inherit" }}
-        >
-          <div
-            style={{
-              padding: "2rem",
-              border: "1px solid var(--border-color)",
-              borderRadius: "8px",
-              backgroundColor: "var(--bg-surface)",
-              cursor: "pointer",
-              transition: "border-color 0.2s ease",
-            }}
-          >
-            <h3>URL Shortener</h3>
-            <p style={{ color: "var(--text-muted)", marginTop: "0.5rem" }}>
-              Secure, local routing with cryptographic IDs.
-            </p>
+        <Link href="/qr" style={{ textDecoration: "none" }}>
+          <div className={styles.card}>
+            <div className={styles.iconWrapper}>
+              <QrCode size={32} strokeWidth={1.5} />
+            </div>
+            <div>
+              <h3 className={styles.cardTitle}>Matrix Forge</h3>
+              <p className={styles.cardDesc}>
+                Generate highly customizable, scalable SVG/PNG QR codes offline.
+              </p>
+            </div>
           </div>
         </Link>
-        <Link
-          href="/image"
-          style={{ textDecoration: "none", color: "inherit" }}
-        >
-          <div
-            style={{
-              padding: "2rem",
-              border: "1px solid var(--border-color)",
-              borderRadius: "8px",
-              backgroundColor: "var(--bg-surface)",
-              cursor: "pointer",
-              transition: "border-color 0.2s ease",
-              height: "100%",
-            }}
-          >
-            <h3>Image Tools</h3>
-            <p style={{ color: "var(--text-muted)", marginTop: "0.5rem" }}>
-              Local resizing, format conversion, and pixel manipulation.
-            </p>
+
+        <Link href="/pdf" style={{ textDecoration: "none" }}>
+          <div className={styles.card}>
+            <div className={styles.iconWrapper}>
+              <FileText size={32} strokeWidth={1.5} />
+            </div>
+            <div>
+              <h3 className={styles.cardTitle}>Document Forge</h3>
+              <p className={styles.cardDesc}>
+                Extract, merge, and inject vector watermarks into PDF files
+                securely.
+              </p>
+            </div>
           </div>
         </Link>
-        <Link href="/pdf" style={{ textDecoration: "none", color: "inherit" }}>
-          <div
-            style={{
-              padding: "2rem",
-              border: "1px solid var(--border-color)",
-              borderRadius: "8px",
-              backgroundColor: "var(--bg-surface)",
-              cursor: "pointer",
-              transition: "border-color 0.2s ease",
-              height: "100%",
-            }}
-          >
-            <h3>PDF Engine</h3>
-            <p style={{ color: "var(--text-muted)", marginTop: "0.5rem" }}>
-              Secure client-side document splitting and extraction.
-            </p>
+
+        <Link href="/image" style={{ textDecoration: "none" }}>
+          <div className={styles.card}>
+            <div className={styles.iconWrapper}>
+              <ImageIcon size={32} strokeWidth={1.5} />
+            </div>
+            <div>
+              <h3 className={styles.cardTitle}>Image Processor</h3>
+              <p className={styles.cardDesc}>
+                Target-size compression, EXIF data shredding, and location
+                spoofing.
+              </p>
+            </div>
           </div>
         </Link>
-        <Link
-          href="/converter"
-          style={{ textDecoration: "none", color: "inherit" }}
-        >
-          <div
-            style={{
-              padding: "2rem",
-              border: "1px solid var(--border-color)",
-              borderRadius: "8px",
-              backgroundColor: "var(--bg-surface)",
-              cursor: "pointer",
-              transition: "border-color 0.2s ease",
-              height: "100%",
-            }}
-          >
-            <h3>File Converter</h3>
-            <p style={{ color: "var(--text-muted)", marginTop: "0.5rem" }}>
-              Parse Markdown and DOCX into compiled PDF formats offline.
-            </p>
+
+        <Link href="/converter" style={{ textDecoration: "none" }}>
+          <div className={styles.card}>
+            <div className={styles.iconWrapper}>
+              <FileCode2 size={32} strokeWidth={1.5} />
+            </div>
+            <div>
+              <h3 className={styles.cardTitle}>Conversion Matrix</h3>
+              <p className={styles.cardDesc}>
+                Parse Markdown and source code into compiled, highlighted PDF
+                formats.
+              </p>
+            </div>
           </div>
         </Link>
-        <Link href="/code" style={{ textDecoration: "none", color: "inherit" }}>
-          <div
-            style={{
-              padding: "2rem",
-              border: "1px solid var(--border-color)",
-              borderRadius: "8px",
-              backgroundColor: "var(--bg-surface)",
-              cursor: "pointer",
-              transition: "border-color 0.2s ease",
-              height: "100%",
-            }}
-          >
-            <h3>Code Studio</h3>
-            <p style={{ color: "var(--text-muted)", marginTop: "0.5rem" }}>
-              Create beautiful, shareable images of your code snippets.
-            </p>
+
+        <Link href="/code" style={{ textDecoration: "none" }}>
+          <div className={styles.card}>
+            <div className={styles.iconWrapper}>
+              <Code2 size={32} strokeWidth={1.5} />
+            </div>
+            <div>
+              <h3 className={styles.cardTitle}>Code Studio</h3>
+              <p className={styles.cardDesc}>
+                Create beautiful, customizable, shareable images of your code
+                snippets.
+              </p>
+            </div>
           </div>
         </Link>
       </div>
