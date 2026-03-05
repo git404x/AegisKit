@@ -139,3 +139,130 @@
 .btnSecondary:hover {
   background-color: var(--border-color);
 }
+
+.tabs {
+  display: flex;
+  background-color: var(--bg-base);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.tab {
+  flex: 1;
+  padding: 0.75rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+.tabActive {
+  background-color: var(--accent);
+  color: #fff;
+}
+
+/* --- Metadata Inspector --- */
+.inspector {
+  flex: 1;
+  min-height: 0;
+  background-color: var(--bg-base);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+.inspector::-webkit-scrollbar {
+  width: 6px;
+}
+.inspector::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 4px;
+}
+
+.infoBox {
+  background-color: rgba(128, 128, 128, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.statusHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dangerText {
+  color: #ff5f56;
+  font-weight: 600;
+}
+.safeText {
+  color: #27c93f;
+  font-weight: 600;
+}
+
+.dataGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.dataRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background-color: rgba(128, 128, 128, 0.05);
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+.dataKey {
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: capitalize;
+}
+.dataValue {
+  color: var(--text-main);
+  font-family: "Courier New", Courier, monospace;
+  text-align: right;
+  max-width: 60%;
+  word-break: break-all;
+}
+
+.btnDanger {
+  background-color: #ff5f56;
+  color: #fff;
+  border: 1px solid #ff5f56;
+}
+.btnDanger:hover {
+  opacity: 0.9;
+}
+.btnDanger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnWarning {
+  background-color: #ffbd2e;
+  color: #000;
+  border: 1px solid #ffbd2e;
+  font-weight: bold;
+}
+.btnWarning:hover {
+  opacity: 0.9;
+}
+.btnWarning:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
