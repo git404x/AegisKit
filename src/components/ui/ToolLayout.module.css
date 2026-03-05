@@ -1,41 +1,91 @@
 .container {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  min-height: 100vh;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.nav {
+  margin-bottom: 2rem;
 }
 
 .backLink {
-  color: var(--text-muted);
-  font-size: 0.9rem;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 2rem;
-  transition: color 0.2s ease;
-  text-decoration: none;
+  color: var(--text-muted);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  padding: 0.5rem 1rem 0.5rem 0;
+  border-radius: 4px;
+  width: max-content;
 }
 
 .backLink:hover {
-  color: var(--text-main);
+  color: var(--accent);
+  transform: translateX(-4px);
 }
 
 .header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
   margin-bottom: 3rem;
-  border-bottom: 1px solid var(--border-color);
   padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+/* The Eye-Candy Icon Block */
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  background-color: var(--color-overlay-subtle);
+  color: var(--accent);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid transparent;
+}
+
+/* Hover Physics: Lift, glow, and tilt */
+.header:hover .iconWrapper {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg-base); /* Inverts icon color */
+  transform: translateY(-4px) scale(1.05) rotate(-3deg);
+  box-shadow: 0 12px 30px -10px var(--accent);
+}
+
+.titleWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
 .title {
   font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin: 0;
   color: var(--text-main);
+  letter-spacing: -0.02em;
+  font-weight: 700;
 }
 
 .subtitle {
+  font-size: 1.1rem;
+  margin: 0;
   color: var(--text-muted);
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

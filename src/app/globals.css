@@ -130,3 +130,29 @@ a {
   font-size: 0.9rem;
   line-height: 1.5;
 }
+
+/* --- UNIVERSAL INTERACTIVE GLOW PHYSICS --- */
+
+/* Automatically catches any class containing 'dropZone', 'input', or 'select' */
+[class*="dropZone"],
+[class*="input"],
+[class*="select"] {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* DropZone Upload Areas */
+[class*="dropZone"]:hover {
+  border-color: var(--accent) !important;
+  background-color: var(--color-overlay-subtle) !important;
+  box-shadow: 0 8px 30px -10px var(--accent);
+  transform: scale(1.01);
+}
+
+/* Inputs and Dropdowns on Focus */
+[class*="input"]:focus,
+[class*="select"]:focus {
+  border-color: var(--accent) !important;
+  box-shadow:
+    0 0 0 4px var(--color-overlay-subtle),
+    0 0 15px -5px var(--accent) !important;
+}

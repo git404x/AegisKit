@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import ToolLayout from "@/components/ui/ToolLayout";
+import { Code2 } from "lucide-react";
 
 const CodeCore = dynamic(() => import("@/components/tools/CodeCore"), {
   ssr: false,
@@ -23,6 +24,7 @@ export default function CodePage() {
     <ToolLayout
       title="Code Studio"
       subtitle="Client-Side // Beautiful Code Images"
+      icon={Code2}
     >
       <CodeCore />
     </ToolLayout>
