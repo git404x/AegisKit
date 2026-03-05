@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import QrCore from "@/components/tools/QrCore";
 import styles from "./page.module.css";
 
 export default function QrPage() {
@@ -19,15 +20,7 @@ export default function QrPage() {
       </header>
 
       {/* The isolated QrCore tool */}
-      <div
-        style={{
-          textAlign: "center",
-          color: "var(--text-muted)",
-          padding: "3rem 0",
-        }}
-      >
-        Mounting QrCore Module...
-      </div>
+      <QrCore />
     </main>
   );
 }
