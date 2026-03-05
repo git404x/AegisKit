@@ -8,15 +8,26 @@ import {
   Code2,
 } from "lucide-react";
 import styles from "./page.module.css";
+import BlurText from "../components/ui/BlurText.js";
+import TextType from "../components/ui/TextType.js";
 
 export default function Home() {
   return (
     <main className={styles.main}>
       <header className={styles.header}>
         <div>
-          <h1 className={styles.title}>AegisKit</h1>
+          <h1 className={styles.title}>
+            <BlurText text="AegisKit" />
+          </h1>
           <p className={styles.subtitle}>
-            Secure. Local. Modular. A privacy-first web toolkit.
+            <TextType
+              text={[
+                "Secure",
+                "Local",
+                "Modular",
+                "A privacy-first web toolkit.",
+              ]}
+            />
           </p>
         </div>
       </header>
