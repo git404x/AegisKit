@@ -19,6 +19,7 @@ const BlurText = ({
   text = "",
   delay = 300,
   className = "",
+  as: Component = "span",
   animateBy = "letters",
   direction = "top",
   threshold = 0.1,
@@ -78,10 +79,10 @@ const BlurText = ({
   );
 
   return (
-    <p
+    <Component
       ref={ref}
       className={className}
-      style={{ display: "flex", flexWrap: "wrap" }}
+      style={{ display: "inline-flex", flexWrap: "wrap" }}
     >
       {elements.map((segment, index) => {
         const animateKeyframes = buildKeyframes(fromSnapshot, toSnapshots);
@@ -109,7 +110,7 @@ const BlurText = ({
           </motion.span>
         );
       })}
-    </p>
+    </Component>
   );
 };
 

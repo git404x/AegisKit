@@ -17,16 +17,12 @@ export default function Home() {
       <header className={styles.header}>
         <div>
           <h1 className={styles.title}>
-            <BlurText text="AegisKit" />
+            <BlurText as="span" text="AegisKit" />
           </h1>
           <p className={styles.subtitle}>
             <TextType
-              text={[
-                "Secure",
-                "Local",
-                "Modular",
-                "A privacy-first web toolkit.",
-              ]}
+              as="span"
+              text={["Secure. Local. Modular.", "A privacy-first web toolkit."]}
             />
           </p>
         </div>
