@@ -1,37 +1,53 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { saveLink } from "@/lib/db";
 import { generateShortId } from "@/lib/utils";
 
 export async function POST(request) {
   try {
-    const body = await request.json();
-    const { originalUrl } = body;
-
-    // Strict Validation
-    if (!originalUrl || typeof originalUrl !== "string") {
-      return NextResponse.json({ error: "Invalid payload." }, { status: 400 });
-    }
-
+    let body;
     try {
-      new URL(originalUrl); // Will throw an error if the URL is malformed
-    } catch (_) {
+      body = await request.json();
+    } catch (err) {
       return NextResponse.json(
-        { error: "Invalid URL format. Must include http:// or https://" },
+        { error: "Invalid JSON payload." },
         { status: 400 },
       );
     }
 
-    // Generate secure 6-character ID
+    let { originalUrl } = body;
+
+    if (!originalUrl || typeof originalUrl !== "string") {
+      return NextResponse.json(
+        { error: "Invalid payload: URL is required." },
+        { status: 400 },
+      );
+    }
+
+    originalUrl = originalUrl.trim();
+    if (!/^https?:\/\//i.test(originalUrl)) {
+      originalUrl = "https://" + originalUrl;
+    }
+
+    try {
+      const parsedUrl = new URL(originalUrl);
+      if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+        return NextResponse.json(
+          { error: "Invalid protocol." },
+          { status: 400 },
+        );
+      }
+    } catch (_) {
+      return NextResponse.json(
+        { error: "Invalid URL format." },
+        { status: 400 },
+      );
+    }
+
+    // Generate ID & Save using the Pure Node Engine
     const shortId = generateShortId(6);
+    saveLink(shortId, originalUrl);
 
-    // Database Insertion (Prepared statement for security)
-    const stmt = db.prepare(
-      "INSERT INTO links (short_id, original_url) VALUES (?, ?)",
-    );
-    stmt.run(shortId, originalUrl);
-
-    // 4. Construct the dynamic local/network URL to return to the client
-    const host = request.headers.get("host");
+    const host = request.headers.get("host") || "localhost:3000";
     const protocol = host.includes("localhost") ? "http" : "https";
     const shortUrl = `${protocol}://${host}/${shortId}`;
 
@@ -40,7 +56,7 @@ export async function POST(request) {
       { status: 201 },
     );
   } catch (error) {
-    console.error("Database operation failed:", error);
+    console.error("Critical API Error:", error);
     return NextResponse.json(
       { error: "Internal server error." },
       { status: 500 },

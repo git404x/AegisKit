@@ -1,21 +1,32 @@
-import Database from "better-sqlite3";
+import fs from "fs";
 import path from "path";
 
-// Initialize the database file in the root of the project
-const dbPath = path.join(process.cwd(), "aegis.db");
-const db = new Database(dbPath);
+// Initialize the local JSON datastore
+const dbPath = path.join(process.cwd(), "aegis-db.json");
 
-// Enforce strict foreign keys and Write-Ahead Logging for better performance
-db.pragma("journal_mode = WAL");
+const initDB = () => {
+  if (!fs.existsSync(dbPath)) {
+    fs.writeFileSync(dbPath, JSON.stringify({ links: [] }, null, 2));
+  }
+};
 
-// Create the links table if it does not exist
-db.exec(`
-  CREATE TABLE IF NOT EXISTS links (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    short_id TEXT UNIQUE NOT NULL,
-    original_url TEXT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
-`);
+export const saveLink = (shortId, originalUrl) => {
+  initDB();
+  const rawData = fs.readFileSync(dbPath, "utf8");
+  const db = JSON.parse(rawData);
 
-export default db;
+  db.links.push({
+    short_id: shortId,
+    original_url: originalUrl,
+    created_at: new Date().toISOString(),
+  });
+
+  fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+};
+
+export const getLink = (shortId) => {
+  initDB();
+  const rawData = fs.readFileSync(dbPath, "utf8");
+  const db = JSON.parse(rawData);
+  return db.links.find((link) => link.short_id === shortId);
+};

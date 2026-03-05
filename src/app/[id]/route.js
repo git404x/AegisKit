@@ -1,18 +1,14 @@
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { getLink } from "@/lib/db";
 
 export async function GET(request, { params }) {
-  const { id } = params;
+  const { id } = await params;
 
   try {
-    // Look up the short ID in our local SQLite database
-    const stmt = db.prepare(
-      "SELECT original_url FROM links WHERE short_id = ?",
-    );
-    const link = stmt.get(id);
+    // Look up the short ID in our local JSON engine
+    const link = getLink(id);
 
     if (!link) {
-      // If the shortlink doesn't exist, route them back to the AegisKit dashboard safely
       return NextResponse.redirect(new URL("/", request.url));
     }
 
@@ -20,7 +16,6 @@ export async function GET(request, { params }) {
     return NextResponse.redirect(link.original_url, 307);
   } catch (error) {
     console.error("Database retrieval failed:", error);
-    // On critical failure, fallback to home to prevent exposing server errors
     return NextResponse.redirect(new URL("/", request.url));
   }
 }
