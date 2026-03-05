@@ -1,0 +1,224 @@
+.wrapper {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .wrapper {
+    grid-template-columns: 1fr 1fr;
+    padding: 2rem;
+  }
+}
+
+.leftPane,
+.rightPane {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.dropZone {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: var(--bg-base);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  min-height: 250px;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.dropZone:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+.hiddenInput {
+  display: none;
+}
+
+.fileInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-main);
+}
+
+.badge {
+  background-color: var(--accent);
+  color: #fff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  background-color: var(--bg-base);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.select {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  width: 100%;
+}
+
+.previewContainer {
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background-color: #ffffff;
+}
+
+.previewContainer::-webkit-scrollbar {
+  width: 6px;
+}
+.previewContainer::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 4px;
+}
+
+.renderChamber {
+  padding: 2rem;
+  font-family: "Inter", sans-serif;
+  line-height: 1.6;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.renderChamber[data-theme="light"] {
+  background-color: #ffffff;
+  color: #333333;
+}
+.renderChamber[data-theme="dark"] {
+  background-color: #0d1117;
+  color: #c9d1d9;
+}
+
+.renderChamber h1,
+.renderChamber h2 {
+  border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+  padding-bottom: 0.3em;
+  margin-top: 1.5em;
+}
+
+/* ROBUST WRAP: Forces code and JSON to stay inside PDF bounds */
+.renderChamber pre {
+  padding: 1rem;
+  border-radius: 4px;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: anywhere !important;
+  background-color: rgba(128, 128, 128, 0.05);
+  margin: 0;
+}
+
+.renderChamber code {
+  font-family: "Courier New", Courier, monospace;
+}
+.renderChamber img {
+  max-width: 100%;
+  height: auto;
+}
+.renderChamber blockquote {
+  border-left: 4px solid var(--accent);
+  opacity: 0.8;
+  padding: 0 1em;
+  margin-left: 0;
+}
+
+.renderChamber table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9em;
+}
+.renderChamber th,
+.renderChamber td {
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  padding: 0.75rem;
+  text-align: left;
+}
+.renderChamber th {
+  background-color: rgba(128, 128, 128, 0.1);
+  font-weight: bold;
+}
+
+.btnPrimary,
+.btnSecondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem;
+  border-radius: 4px;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.btnPrimary {
+  background-color: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+}
+.btnPrimary:hover {
+  opacity: 0.9;
+}
+.btnPrimary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnSecondary {
+  background-color: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+.btnSecondary:hover {
+  background-color: var(--border-color);
+}
