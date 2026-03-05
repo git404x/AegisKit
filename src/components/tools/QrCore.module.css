@@ -1,16 +1,21 @@
 .wrapper {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem;
+  gap: 1.5rem;
   background-color: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 2rem;
+  padding: 1rem; /* Slim padding for mobile */
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden; /* Prevent horizontal scroll locks */
 }
 
 @media (min-width: 768px) {
   .wrapper {
     grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    padding: 2rem; /* Full padding for desktop */
   }
 }
 
@@ -33,7 +38,15 @@
   letter-spacing: 0.05em;
 }
 
-.input {
+.row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap; /* inputs to stack on slim devices */
+}
+
+.input,
+.select {
   background-color: var(--bg-base);
   border: 1px solid var(--border-color);
   color: var(--text-main);
@@ -43,39 +56,12 @@
   font-size: 1rem;
   outline: none;
   transition: border-color 0.2s ease;
+  width: 100%;
 }
 
-.input:focus {
+.input:focus,
+.select:focus {
   border-color: var(--accent);
-}
-
-.colorPickers {
-  display: flex;
-  gap: 1.5rem;
-}
-
-.picker {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-/* Hide default messy color picker UI */
-.colorInput {
-  -webkit-appearance: none;
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 4px;
-  cursor: pointer;
-  background-color: transparent;
-}
-.colorInput::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-.colorInput::-webkit-color-swatch {
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
 }
 
 .preview {
@@ -94,16 +80,30 @@
   background-color: var(--bg-base);
   padding: 1rem;
   border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.canvasContainer canvas,
+.canvasContainer svg {
+  max-width: 100%;
+  height: auto !important;
 }
 
 .actions {
   display: flex;
   gap: 1rem;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .btn,
-.btnPrimary {
+.btnPrimary,
+.btnSecondary,
+.fileUploadWrapper {
   flex: 1;
   display: flex;
   align-items: center;
@@ -115,6 +115,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-width: fit-content;
 }
 
 .btn {
@@ -122,7 +123,6 @@
   color: var(--text-main);
   border: 1px solid var(--border-color);
 }
-
 .btn:hover {
   background-color: var(--border-color);
 }
@@ -132,7 +132,83 @@
   color: #fff;
   border: 1px solid var(--accent);
 }
-
 .btnPrimary:hover {
   opacity: 0.9;
+}
+
+.btnSecondary {
+  background-color: transparent;
+  color: var(--text-muted);
+  border: 1px dashed var(--border-color);
+  font-size: 0.9rem;
+}
+.btnSecondary:hover {
+  color: var(--text-main);
+  border-color: var(--text-muted);
+}
+
+.fileUploadWrapper {
+  position: relative;
+  overflow: hidden;
+  background-color: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+.fileUploadWrapper input[type="file"] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  cursor: pointer;
+  height: 100%;
+  width: 100%;
+}
+.fileUploadWrapper:hover {
+  background-color: var(--border-color);
+}
+
+.colorPickerWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--bg-base);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0.35rem 0.5rem;
+  transition: border-color 0.2s ease;
+  width: 100%;
+}
+
+.colorPickerWrapper:focus-within {
+  border-color: var(--accent);
+}
+
+.colorInput {
+  -webkit-appearance: none;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: transparent;
+  padding: 0;
+}
+
+.colorInput::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.colorInput::-webkit-color-swatch {
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.hexInput {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-family: monospace;
+  font-size: 0.95rem;
+  outline: none;
+  width: 100%;
+  text-transform: uppercase;
 }
