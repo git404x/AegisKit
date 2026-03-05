@@ -128,6 +128,25 @@ export default function Home() {
             </p>
           </div>
         </Link>
+        <Link href="/exif" style={{ textDecoration: "none", color: "inherit" }}>
+          <div
+            style={{
+              padding: "2rem",
+              border: "1px solid var(--border-color)",
+              borderRadius: "8px",
+              backgroundColor: "var(--bg-surface)",
+              cursor: "pointer",
+              transition: "border-color 0.2s ease",
+              height: "100%",
+            }}
+          >
+            <h3>Metadata Shredder</h3>
+            <p style={{ color: "var(--text-muted)", marginTop: "0.5rem" }}>
+              Analyze and securely strip GPS/Camera tracking data from your
+              photos.
+            </p>
+          </div>
+        </Link>
       </div>
     </main>
   );
