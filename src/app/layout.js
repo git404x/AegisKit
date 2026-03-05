@@ -1,3 +1,5 @@
+import { ThemeProvider } from "@/components/ui/ThemeProvider";
+import ThemePicker from "@/components/ui/ThemePicker";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -25,7 +27,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+        <ThemeProvider>
+          {children}
+          <ThemePicker />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -246,7 +246,6 @@ export default function ConverterCore() {
               <div
                 ref={renderRef}
                 className={styles.renderChamber}
-                data-theme={theme}
                 style={{ fontSize: fontSize }}
                 dangerouslySetInnerHTML={{ __html: htmlContent }}
               />

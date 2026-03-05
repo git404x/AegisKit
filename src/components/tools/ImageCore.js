@@ -460,7 +460,7 @@ export default function ImageCore() {
               {exifData ? (
                 <>
                   <div className={styles.statusHeader}>
-                    <ShieldAlert size={28} color="#ff5f56" />
+                    <ShieldAlert size={28} color="var(--color-danger)" />
                     <div>
                       <div className={styles.dangerText}>
                         Tracking Data Detected
@@ -497,7 +497,7 @@ export default function ImageCore() {
                     gap: "1rem",
                   }}
                 >
-                  <Shield size={48} color="#27c93f" />
+                  <Shield size={48} color="var(--color-success)" />
                   <div style={{ textAlign: "center" }}>
                     <div className={styles.safeText}>Image is Clean</div>
                     <div

@@ -39,7 +39,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: var(--color-overlay-heavy);
   color: var(--text-muted);
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -47,7 +47,7 @@
 }
 
 .uploadOverlay:hover {
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--color-overlay-medium);
 }
 
 .hiddenInput {
@@ -206,11 +206,11 @@
 }
 
 .dangerText {
-  color: #ff5f56;
+  color: var(--color-danger);
   font-weight: 600;
 }
 .safeText {
-  color: #27c93f;
+  color: var(--color-success);
   font-weight: 600;
 }
 
@@ -223,7 +223,7 @@
   display: flex;
   justify-content: space-between;
   padding: 0.5rem;
-  background-color: rgba(128, 128, 128, 0.05);
+  background-color: var(--color-overlay-subtle);
   border-radius: 4px;
   font-size: 0.85rem;
 }
@@ -241,9 +241,9 @@
 }
 
 .btnDanger {
-  background-color: #ff5f56;
+  background-color: var(--color-danger);
   color: #fff;
-  border: 1px solid #ff5f56;
+  border: 1px solid var(--color-danger);
 }
 .btnDanger:hover {
   opacity: 0.9;
@@ -254,9 +254,9 @@
 }
 
 .btnWarning {
-  background-color: #ffbd2e;
+  background-color: var(--color-warning);
   color: #000;
-  border: 1px solid #ffbd2e;
+  border: 1px solid var(--color-warning);
   font-weight: bold;
 }
 .btnWarning:hover {
