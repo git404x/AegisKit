@@ -132,3 +132,55 @@
 .btnSecondary:hover {
   background-color: var(--border-color);
 }
+
+.tabs {
+  display: flex;
+  background-color: var(--bg-base);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.tab {
+  flex: 1;
+  padding: 0.75rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.tabActive {
+  background-color: var(--accent);
+  color: #fff;
+}
+
+.fileList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 400px;
+  margin-top: 1rem;
+  text-align: left;
+}
+
+.fileItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: var(--text-main);
+}
