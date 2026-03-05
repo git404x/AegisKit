@@ -1,0 +1,134 @@
+.wrapper {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .wrapper {
+    grid-template-columns: 1fr 300px;
+    padding: 2rem;
+  }
+}
+
+.dropZone {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: var(--bg-base);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  min-height: 250px;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.dropZone:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.fileInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-main);
+}
+
+.badge {
+  background-color: var(--accent);
+  color: #fff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.input {
+  background-color: var(--bg-base);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 1rem;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  border-color: var(--accent);
+}
+
+.btnPrimary,
+.btnSecondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem;
+  border-radius: 4px;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.btnPrimary {
+  background-color: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+}
+.btnPrimary:hover {
+  opacity: 0.9;
+}
+.btnPrimary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnSecondary {
+  background-color: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+.btnSecondary:hover {
+  background-color: var(--border-color);
+}
