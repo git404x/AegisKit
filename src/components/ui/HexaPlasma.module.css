@@ -5,43 +5,57 @@
   width: 100vw;
   height: 100vh;
   z-index: -1;
-  /* The base background color is now managed here */
   background-color: var(--bg-base);
   transition: background-color 0.5s ease;
   overflow: hidden;
   pointer-events: none;
 }
 
-/* --- Plasma Engine --- */
+/* --- The Seamless Aurora Engine --- */
 .plasmaBlob {
   position: absolute;
-  filter: blur(100px);
-  opacity: 0.12;
+  filter: blur(120px); /* Massive blur for seamless blending */
   border-radius: 50%;
   animation: drift 25s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
 }
 
+/* Primary Accent Sweeper */
 .blobPrimary {
+  background: var(--accent);
+  width: 70vw;
+  height: 70vw;
+  top: -20%;
+  left: -10%;
+  opacity: 0.15;
+}
+
+/* Deep Shadow/Muted Sweeper */
+.blobSecondary {
+  background: var(--text-muted);
+  width: 60vw;
+  height: 60vw;
+  bottom: -20%;
+  right: -10%;
+  opacity: 0.12;
+  animation-delay: -7s;
+  animation-duration: 35s;
+}
+
+/* The Core Highlight (gives the aurora a bright center) */
+.blobTertiary {
   background: var(--accent);
   width: 50vw;
   height: 50vw;
-  top: -10%;
-  left: -10%;
-}
-
-.blobSecondary {
-  background: var(--text-muted);
-  width: 45vw;
-  height: 45vw;
-  bottom: -15%;
-  right: -10%;
+  top: 30%;
+  left: 30%;
   opacity: 0.08;
-  animation-delay: -5s;
-  animation-duration: 30s;
+  animation: driftInverse 30s infinite alternate ease-in-out;
+  mix-blend-mode: screen;
 }
 
 [data-theme="light-paper"] .plasmaBlob {
-  opacity: 0.06; /* Softer in light mode */
+  opacity: 0.08; /* Keep light mode readable */
 }
 
 /* --- The Noise Texture Overlay --- */
@@ -73,9 +87,21 @@
     transform: translate(0, 0) scale(1) rotate(0deg);
   }
   50% {
-    transform: translate(10vw, 15vh) scale(1.15) rotate(45deg);
+    transform: translate(15vw, 15vh) scale(1.1) rotate(45deg);
   }
   100% {
     transform: translate(-10vw, 25vh) scale(0.9) rotate(90deg);
+  }
+}
+
+@keyframes driftInverse {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translate(-15vw, -15vh) scale(1.2) rotate(-45deg);
+  }
+  100% {
+    transform: translate(20vw, -10vh) scale(0.8) rotate(-90deg);
   }
 }
