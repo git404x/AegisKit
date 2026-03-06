@@ -3,50 +3,32 @@
 import { useRef, useEffect, useCallback } from "react";
 
 const ClickSpark = ({
-  sparkColor = "#ffffff",
+  sparkColor = "var(--accent)",
   sparkSize = 10,
-  sparkRadius = 15,
+  sparkRadius = 24,
   sparkCount = 8,
-  duration = 400,
+  duration = 500,
   easing = "ease-out",
   extraScale = 1.0,
   children,
 }) => {
   const canvasRef = useRef(null);
   const sparksRef = useRef([]);
-  const startTimeRef = useRef(null);
 
+  // Forces the canvas to match the exact window dimensions without breaking scroll
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const parent = canvas.parentElement;
-    if (!parent) return;
-
-    let resizeTimeout;
-
     const resizeCanvas = () => {
-      const { width, height } = parent.getBoundingClientRect();
-      if (canvas.width !== width || canvas.height !== height) {
-        canvas.width = width;
-        canvas.height = height;
-      }
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     };
 
-    const handleResize = () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(resizeCanvas, 100);
-    };
-
-    const ro = new ResizeObserver(handleResize);
-    ro.observe(parent);
-
+    window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
 
-    return () => {
-      ro.disconnect();
-      clearTimeout(resizeTimeout);
-    };
+    return () => window.removeEventListener("resize", resizeCanvas);
   }, []);
 
   const easeFunc = useCallback(
@@ -59,7 +41,7 @@ const ClickSpark = ({
         case "ease-in-out":
           return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
         default:
-          return t * (2 - t);
+          return t * (2 - t); // ease-out (smooth deceleration)
       }
     },
     [easing],
@@ -69,24 +51,19 @@ const ClickSpark = ({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-
     let animationId;
 
     const draw = (timestamp) => {
-      if (!startTimeRef.current) {
-        startTimeRef.current = timestamp;
-      }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       sparksRef.current = sparksRef.current.filter((spark) => {
         const elapsed = timestamp - spark.startTime;
-        if (elapsed >= duration) {
-          return false;
-        }
+        if (elapsed >= duration) return false;
 
         const progress = elapsed / duration;
         const eased = easeFunc(progress);
 
+        // Physics: The spark stretches out, then shrinks as it reaches the edge
         const distance = eased * sparkRadius * extraScale;
         const lineLength = sparkSize * (1 - eased);
 
@@ -95,8 +72,12 @@ const ClickSpark = ({
         const x2 = spark.x + (distance + lineLength) * Math.cos(spark.angle);
         const y2 = spark.y + (distance + lineLength) * Math.sin(spark.angle);
 
-        ctx.strokeStyle = sparkColor;
-        ctx.lineWidth = 2;
+        // Subtlety: Round the edges and fade opacity smoothly based on progress
+        ctx.globalAlpha = 1 - Math.pow(progress, 1.5); // Fades faster near the end
+        ctx.lineCap = "round";
+        ctx.strokeStyle = spark.color;
+        ctx.lineWidth = 2.5; // Slightly thicker for visibility
+
         ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
@@ -105,37 +86,35 @@ const ClickSpark = ({
         return true;
       });
 
+      // Reset global alpha so we don't accidentally affect future renders
+      ctx.globalAlpha = 1;
       animationId = requestAnimationFrame(draw);
     };
 
     animationId = requestAnimationFrame(draw);
 
-    return () => {
-      cancelAnimationFrame(animationId);
-    };
-  }, [
-    sparkColor,
-    sparkSize,
-    sparkRadius,
-    sparkCount,
-    duration,
-    easeFunc,
-    extraScale,
-  ]);
+    return () => cancelAnimationFrame(animationId);
+  }, [sparkSize, sparkRadius, duration, easeFunc, extraScale]);
 
   const handleClick = (e) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
     const now = performance.now();
+
+    // Dynamically resolve CSS variables into a raw color for the Canvas API
+    let activeColor = sparkColor;
+    if (sparkColor.startsWith("var(")) {
+      const varName = sparkColor.match(/var\(([^)]+)\)/)[1];
+      activeColor =
+        getComputedStyle(document.documentElement)
+          .getPropertyValue(varName)
+          .trim() || "#ffffff";
+    }
+
     const newSparks = Array.from({ length: sparkCount }, (_, i) => ({
-      x,
-      y,
+      x: e.clientX,
+      y: e.clientY,
       angle: (2 * Math.PI * i) / sparkCount,
       startTime: now,
+      color: activeColor,
     }));
 
     sparksRef.current.push(...newSparks);
@@ -146,21 +125,20 @@ const ClickSpark = ({
       style={{
         position: "relative",
         width: "100%",
-        height: "100%",
+        minHeight: "100vh", // Ensures clicking anywhere on the page triggers it
       }}
       onClick={handleClick}
     >
       <canvas
         ref={canvasRef}
         style={{
-          width: "100%",
-          height: "100%",
-          display: "block",
-          userSelect: "none",
-          position: "absolute",
+          position: "fixed", // Floats above everything
           top: 0,
           left: 0,
-          pointerEvents: "none",
+          width: "100vw",
+          height: "100vh",
+          pointerEvents: "none", // CRITICAL: Allows you to click the buttons underneath!
+          zIndex: 99999,
         }}
       />
       {children}

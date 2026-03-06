@@ -61,8 +61,14 @@
   margin: 0;
 }
 
+html,
 body {
-  background-color: var(--bg-base);
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  /* transparent so z-index: -1 backgrounds show through */
+  background-color: transparent !important;
   color: var(--text-main);
   font-family:
     system-ui,
@@ -73,9 +79,7 @@ body {
     sans-serif;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease; /* Smooth theme switching */
+  transition: color 0.3s ease;
 }
 
 a {

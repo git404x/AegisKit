@@ -1,6 +1,6 @@
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import ThemePicker from "@/components/ui/ThemePicker";
-import AmbientAurora from "@/components/ui/AmbientAurora";
+import HexaPlasmaBackground from "@/components/ui/HexaPlasmaBackground";
 import ClickSpark from "@/components/ui/ClickSpark";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -31,7 +31,7 @@ export default function RootLayout({ children }) {
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ThemeProvider>
           <ClickSpark>
-            <AmbientAurora />
+            <HexaPlasmaBackground />
             {children}
             <ThemePicker />
           </ClickSpark>
