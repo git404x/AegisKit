@@ -6,6 +6,7 @@ import {
   Image as ImageIcon,
   FileCode2,
   Code2,
+  ScanFace,
 } from "lucide-react";
 import styles from "./page.module.css";
 import BlurText from "../components/ui/BlurText.js";
@@ -112,6 +113,20 @@ export default function Home() {
               <p className={styles.cardDesc}>
                 Create beautiful, customizable, shareable images of your code
                 snippets.
+              </p>
+            </div>
+          </div>
+        </Link>
+        <Link href="/lens" style={{ textDecoration: "none" }}>
+          <div className={styles.card}>
+            <div className={styles.iconWrapper}>
+              {/* Import ScanFace at the top of page.js if you haven't */}
+              <ScanFace size={32} strokeWidth={1.5} />
+            </div>
+            <div>
+              <h3 className={styles.cardTitle}>Aegis Lens</h3>
+              <p className={styles.cardDesc}>
+                Global hover-translation engine prototype and DOM extractor.
               </p>
             </div>
           </div>

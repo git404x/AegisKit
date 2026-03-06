@@ -1,0 +1,144 @@
+.sandboxContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+}
+
+.btnPrimary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--accent);
+  color: var(--bg-base);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -8px var(--accent);
+}
+
+.btnPrimary.active {
+  background-color: var(--color-danger);
+  color: #fff;
+}
+
+/* --- The Article Area --- */
+.article {
+  padding: 3rem;
+  background-color: var(--color-overlay-subtle);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  line-height: 1.8;
+  font-size: 1.1rem;
+  color: var(--text-main);
+  transition: all 0.3s ease;
+}
+
+/* Use standard text cursor to feel native, the highlight does the talking */
+.article.lensActive {
+  cursor: text;
+}
+
+.article p {
+  margin-bottom: 1.5rem;
+}
+
+/* --- 1. THE WORD HIGHLIGHTER --- */
+/* This box physically snaps over the text in the DOM */
+.textHighlight {
+  position: fixed;
+  pointer-events: none;
+  z-index: 99997;
+  background-color: var(--color-overlay-subtle);
+  border-bottom: 2px solid var(--accent);
+  border-radius: 4px;
+  /* Snappy, physical movement */
+  transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  will-change: top, left, width, height;
+  opacity: 0;
+}
+
+.textHighlight.visible {
+  opacity: 1;
+}
+
+/* --- 2. THE MANGA-STYLE TOOLTIP --- */
+.lensTooltip {
+  position: fixed;
+  pointer-events: none;
+  z-index: 99998;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  /* Solid, sleek dark background for readability */
+  background: #121215;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  min-width: max-content;
+  max-width: 300px;
+
+  /* Centers exactly above the bounding box coordinate */
+  transform: translate(-50%, calc(-100% - 12px));
+  transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  will-change: transform, top, left;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.lensTooltip.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* The Manga Tail / Directional Arrow */
+.lensTooltip::after {
+  content: "";
+  position: absolute;
+  bottom: -6px; /* Hangs off the bottom */
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px 6px 0;
+  border-style: solid;
+  /* Matches the background color of the tooltip */
+  border-color: #121215 transparent transparent transparent;
+}
+
+.sourceWord {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.translatedWord {
+  font-size: 1.05rem;
+  color: #ffffff;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.translatedWord strong {
+  color: var(--accent);
+}
