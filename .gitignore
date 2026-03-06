@@ -42,3 +42,4 @@ next-env.d.ts
 
 # Local Database
 aegis-db.json
+aegis-vault/wrangler.toml

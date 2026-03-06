@@ -1,0 +1,8 @@
+name = "aegis-vault"
+main = "src/index.js"
+compatibility_date = "2026-03-06"
+
+# Rename this file to wrangler.toml and insert your own KV Namespace ID
+[[kv_namespaces]]
+binding = "AEGIS_LINKS"
+id = "YOUR_KV_NAMESPACE_ID_HERE"

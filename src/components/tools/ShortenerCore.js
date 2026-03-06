@@ -4,12 +4,39 @@ import { useState } from "react";
 import { Link as LinkIcon, Copy, Check, AlertCircle } from "lucide-react";
 import styles from "./ShortenerCore.module.css";
 
+const WORKER_URL = process.env.NEXT_PUBLIC_CF_WORKER_URL?.replace(/\/$/, "");
+
+// Base64 Encoder: Prevents "Maximum call stack size" errors on older browsers
+const bufferToBase64UrlSafe = (buffer) => {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+};
+
+const generatePasscode = (length = 10) => {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  const randomValues = new Uint32Array(length);
+  window.crypto.getRandomValues(randomValues);
+  for (let i = 0; i < length; i++) {
+    result += chars[randomValues[i] % chars.length];
+  }
+  return result;
+};
+
 export default function ShortenerCore() {
   const [originalUrl, setOriginalUrl] = useState("");
   const [shortUrl, setShortUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [copyState, setCopyState] = useState("idle"); // "idle" | "success" | "error"
+  const [copyState, setCopyState] = useState("idle");
 
   const handleShorten = async (e) => {
     e.preventDefault();
@@ -17,33 +44,69 @@ export default function ShortenerCore() {
     setError(null);
     setShortUrl(null);
 
+    if (!WORKER_URL) {
+      setError("System Error: Missing NEXT_PUBLIC_CF_WORKER_URL in .env.local");
+      setLoading(false);
+      return;
+    }
+
+    let finalUrl = originalUrl.trim();
+    if (!finalUrl.startsWith("http://") && !finalUrl.startsWith("https://")) {
+      finalUrl = "https://" + finalUrl;
+    }
+
     try {
-      const res = await fetch("/api/shorten", {
+      // 1. Generate 10-char passcode & derive AES key via SHA-256
+      const passcode = generatePasscode(10);
+      const encoder = new TextEncoder();
+      const passBytes = encoder.encode(passcode);
+      const keyHash = await window.crypto.subtle.digest("SHA-256", passBytes);
+
+      const key = await window.crypto.subtle.importKey(
+        "raw",
+        keyHash,
+        { name: "AES-GCM" },
+        false,
+        ["encrypt"],
+      );
+
+      // 2. Encrypt URL
+      const iv = window.crypto.getRandomValues(new Uint8Array(12));
+      const encryptedBuffer = await window.crypto.subtle.encrypt(
+        { name: "AES-GCM", iv: iv },
+        key,
+        encoder.encode(finalUrl),
+      );
+
+      const cipherPayload =
+        bufferToBase64UrlSafe(iv) +
+        "." +
+        bufferToBase64UrlSafe(encryptedBuffer);
+
+      // 3. CRITICAL FIX: Guarantee exactly 6 hex characters for the Vault Firewall
+      const idBuffer = window.crypto.getRandomValues(new Uint8Array(3));
+      const id = Array.from(idBuffer)
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+
+      // 4. Send to Vault
+      const res = await fetch(`${WORKER_URL}/api/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ originalUrl }),
+        body: JSON.stringify({ id, cipherText: cipherPayload }),
       });
 
-      // ROBUST JSON SAFEGUARD
-      let data;
-      const contentType = res.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
-        data = await res.json();
-      } else {
-        // Fallback if the server threw a fatal HTML error
+      if (!res.ok)
         throw new Error(
-          `Server returned a non-JSON response (Status: ${res.status}).`,
+          "Vault rejected request. Check Cloudflare Worker logs.",
         );
-      }
 
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to forge link");
-      }
-
-      setShortUrl(data.shortUrl);
+      // 5. Success
+      setShortUrl(`${WORKER_URL}/${id}#${passcode}`);
       setOriginalUrl("");
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setError("Cryptographic operation failed or Vault is unreachable.");
     } finally {
       setLoading(false);
     }
@@ -56,7 +119,6 @@ export default function ShortenerCore() {
       setCopyState("success");
       setTimeout(() => setCopyState("idle"), 2000);
     } catch (err) {
-      console.warn("Clipboard access denied:", err);
       setCopyState("error");
       setTimeout(() => setCopyState("idle"), 3000);
     }
@@ -97,7 +159,6 @@ export default function ShortenerCore() {
           >
             {shortUrl}
           </a>
-
           <button onClick={handleCopy} className={styles.btn}>
             {copyState === "success" && <Check size={16} />}
             {copyState === "error" && <AlertCircle size={16} />}
