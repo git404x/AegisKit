@@ -6,17 +6,10 @@ import styles from "./ShortenerCore.module.css";
 
 const WORKER_URL = process.env.NEXT_PUBLIC_CF_WORKER_URL?.replace(/\/$/, "");
 
-// Base64 Encoder: Prevents "Maximum call stack size" errors on older browsers
-const bufferToBase64UrlSafe = (buffer) => {
-  let binary = "";
-  const bytes = new Uint8Array(buffer);
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return btoa(binary)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+const buf2hex = (buffer) => {
+  return [...new Uint8Array(buffer)]
+    .map((x) => x.toString(16).padStart(2, "0"))
+    .join("");
 };
 
 const generatePasscode = (length = 10) => {
@@ -25,9 +18,8 @@ const generatePasscode = (length = 10) => {
   let result = "";
   const randomValues = new Uint32Array(length);
   window.crypto.getRandomValues(randomValues);
-  for (let i = 0; i < length; i++) {
+  for (let i = 0; i < length; i++)
     result += chars[randomValues[i] % chars.length];
-  }
   return result;
 };
 
@@ -56,12 +48,10 @@ export default function ShortenerCore() {
     }
 
     try {
-      // 1. Generate 10-char passcode & derive AES key via SHA-256
+      // 1. Generate keys
       const passcode = generatePasscode(10);
-      const encoder = new TextEncoder();
-      const passBytes = encoder.encode(passcode);
+      const passBytes = new TextEncoder().encode(passcode);
       const keyHash = await window.crypto.subtle.digest("SHA-256", passBytes);
-
       const key = await window.crypto.subtle.importKey(
         "raw",
         keyHash,
@@ -70,43 +60,39 @@ export default function ShortenerCore() {
         ["encrypt"],
       );
 
-      // 2. Encrypt URL
+      // 2. Encrypt
       const iv = window.crypto.getRandomValues(new Uint8Array(12));
       const encryptedBuffer = await window.crypto.subtle.encrypt(
         { name: "AES-GCM", iv: iv },
         key,
-        encoder.encode(finalUrl),
+        new TextEncoder().encode(finalUrl),
       );
 
-      const cipherPayload =
-        bufferToBase64UrlSafe(iv) +
-        "." +
-        bufferToBase64UrlSafe(encryptedBuffer);
+      // 3. Convert to clean Hex string separated by a colon
+      const cipherPayload = buf2hex(iv) + ":" + buf2hex(encryptedBuffer);
 
-      // 3. CRITICAL FIX: Guarantee exactly 6 hex characters for the Vault Firewall
+      // 4. Generate perfectly safe 6-character hex ID
       const idBuffer = window.crypto.getRandomValues(new Uint8Array(3));
-      const id = Array.from(idBuffer)
-        .map((b) => b.toString(16).padStart(2, "0"))
-        .join("");
+      const id = buf2hex(idBuffer);
 
-      // 4. Send to Vault
+      // 5. Fire to Vault
       const res = await fetch(`${WORKER_URL}/api/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, cipherText: cipherPayload }),
       });
 
-      if (!res.ok)
-        throw new Error(
-          "Vault rejected request. Check Cloudflare Worker logs.",
-        );
+      // Pass the raw server error directly to the UI if it fails
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Vault rejected request: ${errText}`);
+      }
 
-      // 5. Success
       setShortUrl(`${WORKER_URL}/${id}#${passcode}`);
       setOriginalUrl("");
     } catch (err) {
       console.error(err);
-      setError("Cryptographic operation failed or Vault is unreachable.");
+      setError(err.message || "Cryptographic operation failed.");
     } finally {
       setLoading(false);
     }
@@ -137,13 +123,12 @@ export default function ShortenerCore() {
           placeholder="e.g. github.com or https://example.com/..."
         />
         {error && <span className={styles.error}>{error}</span>}
-
         <button
           type="submit"
           className={styles.btnPrimary}
           disabled={loading || !originalUrl}
         >
-          <LinkIcon size={18} />
+          <LinkIcon size={18} />{" "}
           {loading ? "Forging Link..." : "Create Shortlink"}
         </button>
       </form>

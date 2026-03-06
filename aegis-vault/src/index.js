@@ -1,11 +1,12 @@
 export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };
+
+    const url = new URL(request.url);
 
     if (request.method === "OPTIONS")
       return new Response(null, { headers: corsHeaders });
@@ -14,13 +15,14 @@ export default {
     if (request.method === "POST" && url.pathname === "/api/create") {
       try {
         const { id, cipherText } = await request.json();
-        const isValidId = /^[a-z0-9]{4,6}$/i.test(id);
-        const isValidCipher = /^[A-Za-z0-9-_]+?\.[A-Za-z0-9-_]+?$/.test(
-          cipherText,
-        );
+
+        // The New Hexadecimal WAF Rules
+        const isValidId = /^[a-f0-9]{6}$/i.test(id);
+        const isValidCipher = /^[a-f0-9]+:[a-f0-9]+$/i.test(cipherText);
 
         if (!isValidId || !isValidCipher || cipherText.length > 2000) {
-          return new Response("Invalid payload", {
+          // If you see this specific error, you know the NEW worker is active
+          return new Response("Hex WAF Blocked: Invalid format.", {
             status: 400,
             headers: corsHeaders,
           });
@@ -31,7 +33,7 @@ export default {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       } catch (err) {
-        return new Response("Bad Request", {
+        return new Response("Server Exception", {
           status: 400,
           headers: corsHeaders,
         });
@@ -41,15 +43,21 @@ export default {
     // --- 2. REDIRECT LINK (GET) ---
     if (request.method === "GET" && url.pathname !== "/") {
       const id = url.pathname.slice(1);
-      if (id.length > 6) return new Response("Invalid Link", { status: 400 });
+
+      if (!/^[a-f0-9]{6}$/i.test(id)) {
+        return new Response("Invalid Link Format", {
+          status: 400,
+          headers: corsHeaders,
+        });
+      }
 
       const cipherText = await env.AEGIS_LINKS.get(id);
       if (!cipherText)
         return new Response("AegisKit: Link expired or not found.", {
           status: 404,
+          headers: corsHeaders,
         });
 
-      // The Hardened Decryption Engine
       const html = `
       <!DOCTYPE html>
       <html>
@@ -62,7 +70,7 @@ export default {
           @keyframes spin { 100% { transform: rotate(360deg); } }
           .container { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 400px; padding: 20px; }
           #msg { color: #888; font-size: 14px; margin-top: 10px; }
-          #errorTrace { color: #ff4444; font-size: 12px; margin-top: 10px; word-break: break-all; font-family: monospace; }
+          #errorTrace { color: #ff4444; font-size: 12px; margin-top: 10px; font-family: monospace; word-break: break-all; }
         </style>
       </head>
       <body>
@@ -77,32 +85,20 @@ export default {
               const passcode = window.location.hash.substring(1);
               if(!passcode) throw new Error("Missing decryption key in URL hash.");
 
-              // CRITICAL FIX: Memory-safe binary conversion without Spread Operators
-              const base64ToBuffer = (b64) => {
-                let padded = b64.replace(/-/g, '+').replace(/_/g, '/');
-                while (padded.length % 4 !== 0) padded += '=';
-                const bin = atob(padded);
-                const bytes = new Uint8Array(bin.length);
-                for(let i = 0; i < bin.length; i++) {
-                  bytes[i] = bin.charCodeAt(i);
-                }
+              const hex2buf = (hex) => {
+                const bytes = new Uint8Array(hex.length / 2);
+                for (let i = 0; i < hex.length; i += 2) bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
                 return bytes.buffer;
               };
 
-              // 1. Extract IV and Ciphertext
-              const [ivB64, cipherB64] = "${cipherText}".split('.');
-              if(!ivB64 || !cipherB64) throw new Error("Corrupted payload structure.");
+              const parts = "${cipherText}".split(':');
+              if(parts.length !== 2) throw new Error("Corrupted payload structure.");
 
-              const iv = base64ToBuffer(ivB64);
-              const cipher = base64ToBuffer(cipherB64);
-
-              // 2. Mathematically derive the 256-bit AES key from the URL hash
               const passBytes = new TextEncoder().encode(passcode);
               const keyHash = await crypto.subtle.digest("SHA-256", passBytes);
               const key = await crypto.subtle.importKey("raw", keyHash, { name: "AES-GCM" }, false, ["decrypt"]);
 
-              // 3. Decrypt and execute redirect
-              const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: new Uint8Array(iv) }, key, cipher);
+              const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: new Uint8Array(hex2buf(parts[0])) }, key, hex2buf(parts[1]));
               const targetUrl = new TextDecoder().decode(decrypted);
 
               if(!targetUrl.startsWith("http")) throw new Error("Decrypted string is not a valid URL.");
@@ -120,9 +116,12 @@ export default {
       </html>`;
 
       return new Response(html, {
-        headers: { "Content-Type": "text/html;charset=UTF-8" },
+        headers: { "Content-Type": "text/html;charset=UTF-8", ...corsHeaders },
       });
     }
-    return new Response("AegisKit Vault Active", { status: 200 });
+    return new Response("AegisKit Vault Active", {
+      status: 200,
+      headers: corsHeaders,
+    });
   },
 };
