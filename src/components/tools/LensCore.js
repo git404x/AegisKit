@@ -4,32 +4,50 @@ import { useState, useEffect, useRef } from "react";
 import { ScanFace, ScanLine } from "lucide-react";
 import styles from "./LensCore.module.css";
 
-const MOCK_DICTIONARY = {
-  cryptography: "The mathematical practice of securing communication.",
-  privacy: "The right to remain free from surveillance.",
-  decentralized: "Distributed architecture without a single point of failure.",
-  aegis: "A system of absolute protection.",
-  immutable: "Data that mathematically cannot be altered.",
-  telemetry: "Hidden, automated data collection.",
+// Helper to fetch live data without crashing the UI
+const fetchLensData = async (text, mode) => {
+  try {
+    if (mode === "word") {
+      // Free open API for dictionary definitions
+      const cleanWord = text.replace(/[^a-zA-Z0-9]/g, "");
+      const res = await fetch(
+        `https://api.dictionaryapi.dev/api/v2/entries/en/${cleanWord}`,
+      );
+      if (!res.ok) return "No secure definition found.";
+      const data = await res.json();
+      return (
+        data[0]?.meanings[0]?.definitions[0]?.definition ||
+        "Definition unavailable."
+      );
+    } else if (mode === "sentence") {
+      // Free open API for translations (Translating English to Spanish for the demo)
+      const res = await fetch(
+        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|es`,
+      );
+      const data = await res.json();
+      return data.responseData?.translatedText || "Translation failed.";
+    }
+  } catch (err) {
+    return "Offline or connection error.";
+  }
 };
 
 export default function LensCore() {
   const [isActive, setIsActive] = useState(false);
-
-  // Now tracks the exact DOM Rect instead of the mouse cursor
+  const [extractMode, setExtractMode] = useState("word"); // 'word' or 'sentence'
   const [hoverData, setHoverData] = useState(null);
 
   const containerRef = useRef(null);
-  const currentWordRef = useRef("");
+  const currentTargetRef = useRef("");
 
   useEffect(() => {
     if (!isActive) {
       setHoverData(null);
-      currentWordRef.current = "";
+      currentTargetRef.current = "";
       return;
     }
 
-    const handleMouseMove = (e) => {
+    const handleMouseMove = async (e) => {
       let range;
       if (document.caretRangeFromPoint) {
         range = document.caretRangeFromPoint(e.clientX, e.clientY);
@@ -43,9 +61,9 @@ export default function LensCore() {
       }
 
       if (!range || range.startContainer.nodeType !== Node.TEXT_NODE) {
-        if (currentWordRef.current !== "") {
+        if (currentTargetRef.current !== "") {
           setHoverData(null);
-          currentWordRef.current = "";
+          currentTargetRef.current = "";
         }
         return;
       }
@@ -54,38 +72,73 @@ export default function LensCore() {
       const text = textNode.nodeValue;
       const offset = range.startOffset;
 
-      // Extract the word boundaries
       let start = offset;
-      while (start > 0 && /\w/.test(text[start - 1])) start--;
       let end = offset;
-      while (end < text.length && /\w/.test(text[end])) end++;
 
-      const word = text.slice(start, end).toLowerCase();
+      // --- ADVANCED DOM EXTRACTION MATH ---
+      if (extractMode === "word") {
+        while (start > 0 && /\w/.test(text[start - 1])) start--;
+        while (end < text.length && /\w/.test(text[end])) end++;
+      } else if (extractMode === "sentence") {
+        // Walk back until we hit a punctuation mark (.!?) followed by a space, or start of node
+        while (
+          start > 0 &&
+          !/(?:^|[.!?]\s)/.test(text.slice(Math.max(0, start - 2), start))
+        )
+          start--;
+        // Walk forward until we hit a punctuation mark
+        while (end < text.length && !/[.!?]/.test(text[end])) end++;
+        if (end < text.length) end++; // Include the punctuation mark
+      }
 
-      // Only update if we hover over a valid, NEW word
-      if (word.length > 2 && word !== currentWordRef.current) {
-        currentWordRef.current = word;
+      const extractedText = text.slice(start, end).trim();
 
-        // CRITICAL UPDATE: Create a physical range wrapping JUST the word to get its coordinates
-        const wordRange = document.createRange();
+      // Only trigger if we moved to a NEW target
+      if (
+        extractedText.length > 2 &&
+        extractedText !== currentTargetRef.current
+      ) {
+        currentTargetRef.current = extractedText;
+
+        const targetRange = document.createRange();
         try {
-          wordRange.setStart(textNode, start);
-          wordRange.setEnd(textNode, end);
+          targetRange.setStart(
+            textNode,
+            start + text.slice(start, end).indexOf(extractedText),
+          );
+          targetRange.setEnd(
+            textNode,
+            start +
+              text.slice(start, end).indexOf(extractedText) +
+              extractedText.length,
+          );
 
-          // Get the exact physical dimensions of the text on the screen
-          const rect = wordRange.getBoundingClientRect();
+          const rect = targetRange.getBoundingClientRect();
 
+          // 1. Immediately show the UI in a "Loading" state
           setHoverData({
-            word: word,
-            translation: MOCK_DICTIONARY[word] || "No secure definition found.",
-            rect: rect, // We store the dimensions, not the mouse position!
+            text: extractedText,
+            result: null,
+            loading: true,
+            rect: rect,
           });
-        } catch (err) {
-          // Failsafe for edge-case DOM boundaries
-        }
-      } else if (word.length <= 2 && currentWordRef.current !== "") {
+
+          // 2. Fetch the real data asynchronously
+          const resultText = await fetchLensData(extractedText, extractMode);
+
+          // 3. Update the UI ONLY if the user hasn't moved their mouse to a new word/sentence while waiting
+          if (currentTargetRef.current === extractedText) {
+            setHoverData({
+              text: extractedText,
+              result: resultText,
+              loading: false,
+              rect: rect,
+            });
+          }
+        } catch (err) {}
+      } else if (extractedText.length <= 2 && currentTargetRef.current !== "") {
         setHoverData(null);
-        currentWordRef.current = "";
+        currentTargetRef.current = "";
       }
     };
 
@@ -94,7 +147,7 @@ export default function LensCore() {
 
     const handleMouseLeave = () => {
       setHoverData(null);
-      currentWordRef.current = "";
+      currentTargetRef.current = "";
     };
 
     container.addEventListener("mouseleave", handleMouseLeave);
@@ -103,14 +156,14 @@ export default function LensCore() {
       container.removeEventListener("mousemove", handleMouseMove);
       container.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [isActive]);
+  }, [isActive, extractMode]); // Re-run effect if mode changes
 
   return (
     <div className={styles.sandboxContainer}>
       <div className={styles.controls}>
         <div>
           <h3 style={{ margin: "0 0 0.25rem 0", color: "var(--text-main)" }}>
-            Lens Engine
+            Lens Engine (Live)
           </h3>
           <p
             style={{
@@ -119,16 +172,27 @@ export default function LensCore() {
               color: "var(--text-muted)",
             }}
           >
-            Bounding-box DOM extraction and anchored translation.
+            Real-time API extraction for words and sentences.
           </p>
         </div>
-        <button
-          className={`${styles.btnPrimary} ${isActive ? styles.active : ""}`}
-          onClick={() => setIsActive(!isActive)}
-        >
-          {isActive ? <ScanLine size={18} /> : <ScanFace size={18} />}
-          {isActive ? "Deactivate Lens" : "Activate Lens"}
-        </button>
+        <div className={styles.controlGroup}>
+          <select
+            className={styles.modeSelect}
+            value={extractMode}
+            onChange={(e) => setExtractMode(e.target.value)}
+          >
+            <option value="word">Word (Define)</option>
+            <option value="sentence">Sentence (Translate ES)</option>
+          </select>
+
+          <button
+            className={`${styles.btnPrimary} ${isActive ? styles.active : ""}`}
+            onClick={() => setIsActive(!isActive)}
+          >
+            {isActive ? <ScanLine size={18} /> : <ScanFace size={18} />}
+            {isActive ? "Deactivate" : "Activate"}
+          </button>
+        </div>
       </div>
 
       <div
@@ -140,22 +204,20 @@ export default function LensCore() {
           website like Medium or a Wikipedia article.
         </p>
         <p>
-          In a modern digital landscape, <strong>privacy</strong> is not just a
-          feature, it is a fundamental right. Through the power of{" "}
-          <strong>cryptography</strong>, we can build tools that are completely
-          <strong> decentralized</strong> and <strong>immutable</strong>.
+          In a modern digital landscape, privacy is not just a feature, it is a
+          fundamental right. Through the power of cryptography, we can build
+          tools that are completely decentralized and immutable.
         </p>
         <p>
-          Activate the lens above, and hover your mouse over the bolded words
-          (or any word). Notice how the engine extracts the geometric bounding
-          box of the text, blocking external <strong>telemetry</strong>.
+          Activate the lens above, and switch the dropdown to "Sentence". Notice
+          how the engine dynamically calculates the bounds of entire grammatical
+          structures and fetches real-time Spanish translations over the network
+          while you hover.
         </p>
       </div>
 
-      {/* --- THE BOUDNING BOX UI --- */}
       {isActive && (
         <>
-          {/* 1. The Word Highlighter (Snaps perfectly over the text) */}
           <div
             className={`${styles.textHighlight} ${hoverData ? styles.visible : ""}`}
             style={{
@@ -166,11 +228,9 @@ export default function LensCore() {
             }}
           />
 
-          {/* 2. The Anchored Manga Tooltip */}
           <div
             className={`${styles.lensTooltip} ${hoverData ? styles.visible : ""}`}
             style={{
-              // Centers horizontally based on the word's width, and anchors to the top of the word
               left: hoverData
                 ? hoverData.rect.left + hoverData.rect.width / 2
                 : 0,
@@ -178,20 +238,15 @@ export default function LensCore() {
             }}
           >
             <span className={styles.sourceWord}>
-              {hoverData?.word || "Scanning"}
+              {hoverData?.text || "Scanning"}
             </span>
-            <span className={styles.translatedWord}>
-              {hoverData ? (
-                <>
-                  <strong>{hoverData.translation.split(" ")[0]}</strong>{" "}
-                  {hoverData.translation.substring(
-                    hoverData.translation.indexOf(" ") + 1,
-                  )}
-                </>
+            <div className={styles.translatedWord}>
+              {hoverData?.loading ? (
+                <div className={styles.loadingSkeleton} />
               ) : (
-                "..."
+                hoverData?.result
               )}
-            </span>
+            </div>
           </div>
         </>
       )}
