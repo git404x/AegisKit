@@ -83,9 +83,14 @@ export default function HexaPlasmaBackground() {
 
     initParticles();
 
+    let cachedRgb = getAccentRgb();
+    const themeInterval = setInterval(() => {
+      cachedRgb = getAccentRgb();
+    }, 500);
+
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const rgb = getAccentRgb();
+      const rgb = cachedRgb;
 
       particles.forEach((p) => {
         // 1. Flow Upwards
@@ -139,6 +144,7 @@ export default function HexaPlasmaBackground() {
     return () => {
       window.removeEventListener("resize", resize);
       cancelAnimationFrame(animationId);
+      clearInterval(themeInterval);
     };
   }, []);
 
